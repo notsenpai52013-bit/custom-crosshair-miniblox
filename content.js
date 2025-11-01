@@ -15,6 +15,12 @@
     // === Load saved color or default ===
     let currentColor = localStorage.getItem("miniblox_crosshair_color") || "rgb(255,255,255)";
 
+    // === STATE MANAGEMENT VARIABLES ===
+    // F5 Hide/Show cycle: 0=Show, 1=Hide, 2=Hide
+    let f5PressCount = 0; 
+    // F1/Z/Escape Hide/Show toggle: false=Show, true=Hide
+    let otherKeysManualHide = false;
+    
     // === Helper ===
     const makeLine = (styles) => {
         const div = document.createElement('div');
@@ -255,10 +261,44 @@
 
     sliders.forEach(s => s.querySelector('input').addEventListener('input', updateColor));
 
-    // === Toggle menu with "\" ===
+    // === Toggle menu and Key-based Hide Logic ===
     document.addEventListener('keydown', e => {
+        // Toggle menu when ']' is pressed
         if (e.key === '\\') {
             menu.style.display = (menu.style.display === 'none') ? 'block' : 'none';
+        }
+
+        // Handle F5 specific logic (Stop, Stop, Show)
+        if (e.key === 'F5') {
+            e.preventDefault(); // Attempt to prevent browser refresh for F5
+            
+            f5PressCount = (f5PressCount + 1) % 3; // Cycles through 0, 1, 2
+            
+            // F5 now takes control, so reset otherKeysManualHide
+            otherKeysManualHide = false; 
+
+            // Immediate hide/show for F5 to feel responsive
+            if (f5PressCount === 0) {
+                crosshairContainer.style.display = 'block';
+            } else {
+                crosshairContainer.style.display = 'none';
+            }
+        }
+
+        // Handle F1, Z, Escape toggle logic
+        if (e.key === 'F1' || e.key === 'F3' || e.key.toLowerCase() === 'z' || e.key === 'escape' || e.key === 'e') {
+            // Toggle the hide state
+            otherKeysManualHide = !otherKeysManualHide;
+
+            // F1/Z/Esc now takes control, so reset F5 counter
+            f5PressCount = 0; 
+            
+            // Immediate hide/show for responsiveness
+            if (otherKeysManualHide) {
+                 crosshairContainer.style.display = 'none';
+            } else {
+                 crosshairContainer.style.display = 'block';
+            }
         }
     });
 
@@ -266,11 +306,29 @@
     const checkCrosshair = () => {
         const defaultCrosshair = document.querySelector('.css-xhoozx');
         const pauseMenu = document.querySelector('.chakra-modal__content-container,[role="dialog"]');
+        
+        // The crosshair should be hidden if EITHER the F5 cycle is in a hide state (1 or 2) OR the other keys toggle is on (true).
+        const isManuallyHidden = (f5PressCount === 1 || f5PressCount === 2) || otherKeysManualHide;
+
+        // --- Custom Crosshair Logic ---
         if (defaultCrosshair && !pauseMenu) {
-            defaultCrosshair.style.display = 'none';
-            crosshairContainer.style.display = 'block';
+            
+            if (isManuallyHidden) {
+                // If either state variable says "hide," force it hidden
+                crosshairContainer.style.display = 'none';
+                defaultCrosshair.style.display = 'none';
+            } else {
+                // Otherwise, the crosshair is allowed to be visible.
+                defaultCrosshair.style.display = 'none';
+                crosshairContainer.style.display = 'block';
+            }
         } else {
+            // Hide custom crosshair when game state changes (e.g., pause menu opens)
             crosshairContainer.style.display = 'none';
+            
+            // When game state changes (e.g., pause menu), reset all manual hides
+            f5PressCount = 0; 
+            otherKeysManualHide = false; 
         }
     };
     new MutationObserver(checkCrosshair).observe(document.body, { childList: true, subtree: true });

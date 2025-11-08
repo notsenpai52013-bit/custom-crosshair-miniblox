@@ -263,8 +263,8 @@
 
     // === Toggle menu and Key-based Hide Logic ===
     document.addEventListener('keydown', e => {
-        // Toggle menu when ']' is pressed
-        if (e.key === '\\') {
+        // Toggle menu when '=' is pressed
+        if (e.key === '=') {
             menu.style.display = (menu.style.display === 'none') ? 'block' : 'none';
         }
 
@@ -286,7 +286,7 @@
         }
 
         // Handle F1, Z, Escape toggle logic
-        if (e.key === 'F1' || e.key === 'F3' || e.key.toLowerCase() === 'z' || e.key === 'escape' || e.key === 'e') {
+        if (e.key === 'F1') {
             // Toggle the hide state
             otherKeysManualHide = !otherKeysManualHide;
 

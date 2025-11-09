@@ -11,8 +11,9 @@
     }
   ],
   "icons": {
-    "128": "wsp67.webp"
+    "128": "wsg.png"
   },
   "host_permissions": ["https://miniblox.io/*"]
 }
+
 
